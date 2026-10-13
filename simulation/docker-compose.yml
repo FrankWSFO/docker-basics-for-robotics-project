@@ -1,0 +1,37 @@
+version: '3'
+services:
+  fastbot-sim:
+    image: frankwsfo/fdw-cp22:fastbot-ros2-gazebo
+    container_name: fastbot-ros2-gazebo
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.gazebo:/root/.gazebo
+  fastbot-slam:
+    image: frankwsfo/fdw-cp22:fastbot-ros2-slam
+    container_name: fastbot-ros2-slam
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+  fastbot-web:
+    image: frankwsfo/fdw-cp22:fastbot-ros2-webapp
+    container_name: fastbot-ros2-webapp
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    ports:
+      - "7000:7000"
+      - "11315:11315"
+      - "9090:9090"
