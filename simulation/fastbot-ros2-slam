@@ -1,10 +1,8 @@
 FROM osrf/ros:humble-desktop
-# FROM frankwsfo/nvidia_ros2:latest
 
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
 
-# Install Gazebo 11 and other dependencies
 RUN apt-get update && apt-get install -y \
   ros-humble-robot-state-publisher \
   ros-humble-robot-localization \
@@ -29,8 +27,6 @@ RUN source /opt/ros/humble/setup.bash \
 
 COPY ./fastbot /fastbot_ws/src/fastbot/
 COPY ./fastbot_ros2_docker/simulation/cartographer_config.rviz /fastbot_ws/src/fastbot/fastbot_slam/config/cartographer_config.rviz
-# git clone -b docker https://aezquerro@bitbucket.org/theconstructcore/fastbot.git
-# RUN echo "export GAZEBO_MODEL_PATH=/fastbot_ws/src/fastbot/fastbot_description/models:/fastbot_ws/src:/fastbot_ws/src/fastbot:/fastbot_ws/src/fastbot/fastbot_description:/fastbot_ws/src/fastbot/fastbot_description/onshape:/fastbot_ws/src/fastbot/fastbot_description/onshape/assets:/fastbot_ws/src/fastbot/fastbot_description" >> ~/.bashrc
  
 # Build the Colcon workspace and ensure it's sourced
 RUN source /opt/ros/humble/setup.bash \
@@ -42,33 +38,21 @@ RUN echo "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.
 # Set environment variables
 ENV ROS_DOMAIN_ID=1
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-# ENV GAZEBO_MODEL_PATH=/fastbot_ws/src/fastbot/fastbot_description/models:/fastbot_ws/src:/fastbot_ws/src/fastbot:/fastbot_ws/src/fastbot/fastbot_description:/fastbot_ws/src/fastbot/fastbot_description/onshape:/fastbot_ws/src/fastbot/fastbot_description/onshape/assets:/fastbot_ws/src/fastbot/fastbot_description
-# ENV GAZEBO_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gazebo-11/plugins
-# ENV GAZEBO_RESOURCE_PATH=/usr/share/gazebo-11:/usr/share/gazebo
 
 # Set the working folder at startup
 WORKDIR /fastbot_ws
 
 ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.bash && ros2 launch fastbot_slam cartographer.launch.py & sleep 5 && source /opt/ros/humble/setup.bash && rviz2 -d /fastbot_ws/src/fastbot/fastbot_slam/config/cartographer_config.rviz & tail -f /dev/null"]
-# ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"]
-# ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py --log-level debug 2>&1 | grep -i "mesh\|stl\|package\|fastbot_description""]
-# ENTRYPOINT source /opt/ros/humble/setup.bash && \
-#           source /fastbot_ws/install/setup.bash && \
-#           ros2 launch fastbot_gazebo one_fastbot_room.launch.py --log-level debug 2>&1 | \
-#           grep -i "mesh\|stl\|package\|fastbot_description"
 
 
 # Command to build:
+# cd ~/ros2_ws/src
 # docker build -f ./fastbot_ros2_docker/simulation/fastbot-ros2-slam -t fastbot-ros2-slam .
 
-# Maybe gotta do on local host before:
-# xhost +local:root 
-
 # Command to run:
-# docker run --rm -e DISPLAY=${DISPLAY} -v /tmp/.X11-unix:/tmp/.X11-unix --network=host fastbot-ros2-gazebo
-# Having network=host can be bad bc causes additional security checks, only need if want access host network, no need just for display on host apparently
-# docker run --rm -e DISPLAY=${DISPLAY} -v /tmp/.X11-unix:/tmp/.X11-unix fastbot-ros2-gazebo
-# Apparently this allows for software rendering if there are perhaps issues with gpu 
-# docker run --rm -e DISPLAY=${DISPLAY} -v /tmp/.X11-unix:/tmp/.X11-unix -e LIBGL_ALWAYS_SOFTWARE=1 --name fastbot-ros2-gazebo frankwsfo/fdw-cp22:fastbot-ros2-gazebo
-# Or this
-# docker run --rm -e DISPLAY=${DISPLAY} -v /tmp/.X11-unix:/tmp/.X11-unix -e LIBGL_ALWAYS_SOFTWARE=1 --name fastbot-ros2-gazebo-cntr fastbot-ros2-gazebo
+# docker run --rm -it \
+#   -e DISPLAY=${DISPLAY} \
+#   -v /tmp/.X11-unix:/tmp/.X11-unix \
+#   -e LIBGL_ALWAYS_SOFTWARE=1 \
+#   --name fastbot-ros2-slam \
+#   fastbot-ros2-slam
