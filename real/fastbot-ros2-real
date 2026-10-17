@@ -1,0 +1,95 @@
+FROM ros:humble-ros-base
+# FROM frankwsfo/nvidia_ros2:latest
+
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
+
+# Install Gazebo 11 and other dependencies
+RUN apt-get update && apt-get install -y \
+  ros-humble-v4l2-camera ros-humble-image-transport-plugins v4l-utils \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-joint-state-publisher \
+  ros-humble-robot-state-publisher \
+  ros-humble-robot-localization \
+  ros-humble-xacro \
+  ros-humble-tf2-ros \
+  ros-humble-tf2-tools \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-rmw-cyclonedds-cpp \
+  libboost-thread-dev \
+  libboost-system-dev \
+  libpcl-dev \
+  ros-humble-pcl-conversions \
+  ros-humble-diagnostic-updater \
+  python3-colcon-common-extensions \
+  python3-serial \
+  build-essential \
+  git \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+    libpcap-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN source /opt/ros/humble/setup.bash \
+    && mkdir -p /fastbot_ws/src \                
+        && cd /fastbot_ws/src \
+    && git clone https://github.com/FrankWSFO/fastbot-ros2-drivers-checkpoint-20.git \
+    && cd /fastbot_ws \
+    && colcon build --symlink-install \
+    && echo "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.bash" >> ~/.bashrc
+
+# Set the working folder at startup
+WORKDIR /fastbot_ws
+
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && source /fastbot_ws/install/setup.bash && ros2 launch fastbot_bringup bringup.launch.xml & tail -f /dev/null"]
+
+# To build
+# cd ~/ros2_ws/src/docker-basics-for-robotics-project/real
+# docker build -f fastbot-ros2-real -t fastbot-ros2-real .
+# Apparently something like this can get it to restart automatically
+
+# Or on rosject:
+# cd ~/ros2_ws/src/fastbot_ros2_docker/real
+# docker build -f fastbot-ros2-real -t fastbot-ros2-real .
+
+# To run on PI:
+# docker run --rm -it --name fastbot-ros2-real --device /dev/ttyUSB0:/dev/ttyUSB0 --device /dev/lslidar:/dev/lslidar --device /dev/video0:/dev/video0 --network host -e ROS_DOMAIN_ID=1 -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e CYCLONEDDS_URI=file:///cyclonedds_husarnet.xml -v /var/lib/theconstruct.rrl/cyclonedds_husarnet.xml:/cyclonedds_husarnet.xml:ro fastbot-ros2-real
+
+# to discover topics on rosject that's connected to PI via Husarnet, on rosject terminal, run:
+#	export ROS_DOMAIN_ID=1
+#	export CYCLONEDDS_URI=file:///var/lib/theconstruct.rrl/cyclonedds.xml
+#	ros2 daemon stop 
+#	ros2 daemon start
+#	ros2 topic list
+                                                                                                                                                        
+# [Unit]                                                                                                                                               
+# Description=Fastbot Robot Drivers                                                                                                                     
+# After=docker.service network.target                                                                                                                   
+# Requires=docker.service                                                                                                                              
+                                                                                                                                                      
+# [Service]                                                                                                                                          
+# Restart=always                                                                                                                                
+# RestartSec=5                                                                                                                                        
+# ExecStartPre=-/usr/bin/docker stop fastbot-drivers                                                                                                   
+# ExecStartPre=-/usr/bin/docker rm fastbot-drivers                                                                                                      
+# ExecStart=/usr/bin/docker run --name fastbot-drivers \                                                                                                
+#   --privileged \                                                                                                                                      
+#   -e DISPLAY=:1 \                                                                                                                                     
+#   -v /tmp/.X11-unix:/tmp/.X11-unix \                                                                                                                  
+#   fastbot-drivers:latest                                                                                                                             
+# ExecStop=/usr/bin/docker stop fastbot-drivers                                                                                                        
+                                                                                                                                                      
+# [Install]                                                                                                                                            
+# WantedBy=multi-user.target                                                                                                                            
+# to be a  /etc/systemd/system/fastbot-drivers.service file created
+
+# then need to run this
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable fastbot-drivers.service
+# sudo systemctl start fastbot-drivers.service
+# # Check status
+# sudo systemctl status fastbot-drivers.service  
