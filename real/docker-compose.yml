@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 services:
   fastbot-real:
     image: frankwsfo/fdw-cp22:fastbot-ros2-real    
@@ -15,6 +15,12 @@ services:
       - /dev/lslidar:/dev/lslidar
       - /dev/video0:/dev/video0
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'source /opt/ros/humble/setup.bash && ros2 topic list | grep -q /fastbot/scan'"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 10s
   fastbot-real-slam:
     image: frankwsfo/fdw-cp22:fastbot-ros2-real-slam
     container_name: fastbot-ros2-real-slam
@@ -32,3 +38,6 @@ services:
     restart: always
     # depends_on:
     #   - fastbot-real
+    depends_on:
+      fastbot-real:
+        condition: service_healthy
