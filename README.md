@@ -39,6 +39,8 @@ Now, you should be able to see a joystick to control the robot, a map that can b
 
 ### Real
 
+Note: This assumes your fastbot's Raspberry PI is set up according to the assembly guidelines provided by The Construct and has docker installed. It also assumes the machine you're using to ssh into your PI is connected to the PI over a LAN to allow for ros2 topic discovery, and has ros2 and rviz2 installed. Thus, you should already be able to run a ros node on your PI and be able to see the topics and visualize them in Rviz on your external computer that sshes into your PI.
+
 To start the real fastbot drivers and slam, first ssh into your fastbot.
 
 Then, in your desired workspace's src folder (eg ~/ros2_ws/src), execute:
@@ -49,17 +51,19 @@ Then, in your desired workspace's src folder (eg ~/ros2_ws/src), execute:
 
 To access the ros topics within the fastbot, in a terminal ssh'd into it, execute:
 
-	export ROS_DOMAIN_ID=1
+	export ROS_DOMAIN_ID=0
+    export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    source /opt/ros/humble/setup.bash
 	ros2 topic list
 
-Note: One must always export the ROS_DOMAIN_ID to be 1 to be on the same communication channel when in a new fastbot terminal (or if one would like to automatically get access, add it to the end of your ~/.bashrc)
+And in a terminal on your external computer, to get access to the topics of your fastbot, execute:
 
-Then in a terminal on this rosject, to get access to the topics of your fastbot, execute:
-
-	export ROS_DOMAIN_ID=1
-	export CYCLONEDDS_URI=file:///var/lib/theconstruct.rrl/cyclonedds.xml
+	export ROS_DOMAIN_ID=0
+	export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    source /opt/ros/<ros-distro>/setup.bash
 	ros2 topic list
 
-And to visualize the mapping, in this rosject, run:
+Finally, to visualize the mapping, in your desired folder (eg ~/ros2_ws/src), run:
 
-	rviz2 -d ~/temp_ws/src/ros2-ws-the-construct-web-development-project/fastbot_slam/rviz/cartography.rviz
+    git clone https://github.com/FrankWSFO/docker-basics-for-robotics-project.git
+	rviz2 -d ./docker-basics-for-robotics-project/rviz/cartography.rviz
