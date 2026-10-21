@@ -5,10 +5,10 @@ services:
     container_name: fastbot-ros2-real
     environment:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
-      - CYCLONEDDS_URI=file:///cyclonedds_husarnet.xml
-    volumes:
-      - /var/lib/theconstruct.rrl/cyclonedds_husarnet.xml:/cyclonedds_husarnet.xml:ro
+      # - ROS_DOMAIN_ID=1
+      # - CYCLONEDDS_URI=file:///cyclonedds_husarnet.xml
+    # volumes:
+      # - /var/lib/theconstruct.rrl/cyclonedds_husarnet.xml:/cyclonedds_husarnet.xml:ro
     network_mode: host
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
@@ -26,10 +26,10 @@ services:
     container_name: fastbot-ros2-real-slam
     environment:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
-      - CYCLONEDDS_URI=file:///cyclonedds_husarnet.xml
-    volumes:
-      - /var/lib/theconstruct.rrl/cyclonedds_husarnet.xml:/cyclonedds_husarnet.xml:ro
+      # - ROS_DOMAIN_ID=1
+      # - CYCLONEDDS_URI=file:///cyclonedds_husarnet.xml
+    # volumes:
+      # - /var/lib/theconstruct.rrl/cyclonedds_husarnet.xml:/cyclonedds_husarnet.xml:ro
     network_mode: host
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
